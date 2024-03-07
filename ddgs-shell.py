@@ -2,7 +2,12 @@
 
 from duckduckgo_search import DDGS
 # from argparse import ArgumentParser as argparser
-from rich import print
+from rich.console import Console
+from rich.markup import escape
+
+width = 100
+console = Console(width=width)
+print = console.print
 
 shell_message = """
 !q\t\tquit
@@ -17,6 +22,7 @@ shell_message = """
 !d\t\tset/unset debugging info, off by default
 !vs\t\tset/unset stepping for printing results, off by default
 !o [FILES]\t\toutputs results to file(s)
+!w WIDTH\t\tto set console to certain width
 !h\t\tprint this message
 """
 
@@ -64,9 +70,9 @@ def Print_Search(results: list, step: bool = False):
     if step:
         print("[yellow]!q to stop scrolling if needed[/yellow]")
     for res in results:
-        print("[b]"+res["title"]+"[/b]")
-        print(res["href"])
-        print(res["body"])
+        print("[b]"+escape(res["title"])+"[/b]")
+        print(escape(res["href"]))
+        print(escape(res["body"]))
         print("-----------")
         if step:
             tmp = input("Next")
@@ -83,6 +89,7 @@ def Output_Search(results):
 
 
 def Shell(*args):
+
     print("Welcome to DDGS expanded search")
     print(shell_message)
     text = ""
@@ -137,6 +144,7 @@ def Shell(*args):
                       f"Debugging: {debug}",
                       f"Excluding links: {ex_links}",
                       f"Ignoring case: {ignore_case}",
+                      f"Width: {console.width}",
                       sep="\n")
             case "!s":
                 if text == "":
@@ -167,6 +175,17 @@ def Shell(*args):
                 print(f"[green]Debugging set to: {debug}[/green]")
             case "!h":
                 print(shell_message)
+            case "!w":
+                if len(inp) != 2:
+                    print("[red]!w takes exactly 1 argument[/red]")
+                    continue
+                try:
+                    console.width = int(inp[1])
+                    print(f"[green]Width set to {console.width}[/green]")
+                except Exception as e:
+                    print(f"[red]Couldn't set width to {inp[1]}[/red]")
+                    if debug:
+                        print("[red]" + escape(e) + "[/red]")
             case "!o":
                 if results is None:
                     print("[red]No results to write[/red]")
