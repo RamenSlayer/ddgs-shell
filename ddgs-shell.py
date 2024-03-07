@@ -1,4 +1,4 @@
-#!usr/bin/python3
+#!/usr/bin/python3
 
 from duckduckgo_search import DDGS
 # from argparse import ArgumentParser as argparser
