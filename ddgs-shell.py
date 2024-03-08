@@ -16,7 +16,7 @@ shell_message = """
 !e TEXT\t\texclude words, no text unsets it
 !el\t\tset/unset excluding words from links, off by default
 !ec\t\tset/unset case sensitivity for word exclusion
-!m NUM\t\tset max number of results
+!m [NUM]\t\tset max number of results
 !p\t\tprint all variables
 !s\t\texecutes search
 !d\t\tset/unset debugging info, off by default
@@ -75,7 +75,7 @@ def Print_Search(results: list, step: bool = False):
         print(escape(res["body"]))
         print("-----------")
         if step:
-            tmp = input("Next")
+            tmp = input("Next ")
             if tmp in ["!q", 'q']:
                 break
     return 0
@@ -89,11 +89,10 @@ def Output_Search(results):
 
 
 def Shell(*args):
-
     print("Welcome to DDGS expanded search")
     print(shell_message)
     text = ""
-    max_res = 100
+    max_res = None
     ex_words = None
     results = None
     debug = False
@@ -125,9 +124,12 @@ def Shell(*args):
                 ignore_case = not ignore_case
                 print(f"[green]Ignoring exclusion case: {ignore_case}[/green]")
             case "!m":
-                if len(inp) != 2:
-                    print("[red]max requires exactly one argument[/red]")
+                if len(inp) > 2:
+                    print("[red]max requires 1 or 0 arguments[/red]")
                     continue
+                if len(inp) == 1:
+                    max_res = None
+                    print("[green]max set to None[/green]")
                 try:
                     max_res = int(inp[1])
                     print(f"[green]Max results set to {max_res}[/green]")
@@ -146,6 +148,10 @@ def Shell(*args):
                       f"Ignoring case: {ignore_case}",
                       f"Width: {console.width}",
                       sep="\n")
+                if results is None:
+                    print(f"Number of results: {results}")
+                else:
+                    print(f"Number of results: {len(results)}")
             case "!s":
                 if text == "":
                     print("[red]No search text![/red]")
