@@ -134,11 +134,12 @@ def Shell(*args):
                 if len(inp) == 1:
                     max_res = None
                     print("[green]max set to None[/green]")
+                    continue
                 try:
                     max_res = int(inp[1])
                     print(f"[green]Max results set to {max_res}[/green]")
                 except Exception as e:
-                    print(f"[red]Couldn't set max results to {inp[1]}[red]")
+                    print(f"[red]Couldn't set max results to {' '.join(inp[1:])} [red]")
                     if debug:
                         print(f"[red]{e}[/red]")
                     continue
