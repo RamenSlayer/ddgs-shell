@@ -23,7 +23,7 @@ s\t\texecutes search
 m NUM\t\tset max number of search results
 d\t\tset/unset debugging info, off by default
 vs\t\tset/unset stepping for printing results, off by default
-o [FILES]\t\toutputs results to file(s)
+o [FILES]\toutputs results to file(s)
 w WIDTH\t\tto set console to certain width
 h\t\tprint this message
 """

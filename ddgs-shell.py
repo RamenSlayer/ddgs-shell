@@ -10,20 +10,20 @@ console = Console(width=width)
 print = console.print
 
 shell_message = """
-!q\t\tquit
-!v\t\tprint out the results
-!t TEXT\t\ttext to search for
-!e TEXT\t\texclude words, no text unsets it
-!el\t\tset/unset excluding words from links, off by default
-!ec\t\tset/unset case sensitivity for word exclusion
-!m [NUM]\t\tset max number of results
-!p\t\tprint all variables
-!s\t\texecutes search
-!d\t\tset/unset debugging info, off by default
-!vs\t\tset/unset stepping for printing results, off by default
-!o [FILES]\t\toutputs results to file(s)
-!w WIDTH\t\tto set console to certain width
-!h\t\tprint this message
+q\t\tquit
+v\t\tprint out the results
+t TEXT\t\ttext to search for
+e TEXT\t\texclude words, no text unsets it
+el\t\tset/unset excluding words from links, off by default
+ec\t\tset/unset case sensitivity for word exclusion
+m [NUM]\t\tset max number of results
+p\t\tprint all variables
+s\t\texecutes search
+d\t\tset/unset debugging info, off by default
+vs\t\tset/unset stepping for printing results, off by default
+o [FILES]\toutputs results to file(s)
+w WIDTH\t\tto set console to certain width
+h\t\tprint this message
 """
 
 
@@ -68,7 +68,7 @@ def Exclude(results: list,
 
 def Print_Search(results: list, step: bool = False):
     if step:
-        print("[yellow]!q to stop scrolling if needed[/yellow]")
+        print("[yellow]q to stop scrolling if needed[/yellow]")
     for res in results:
         print("[b]"+escape(res["title"])+"[/b]")
         print(escape(res["href"]))
@@ -101,7 +101,7 @@ def Shell(*args):
     step = False
     while True:
         inp = input(" > ")
-        if inp == '!q':
+        if inp == 'q':
             print("Exiting")
             break
         else:
@@ -109,23 +109,23 @@ def Shell(*args):
         if len(inp) == 0:
             continue
         match inp[0]:
-            case "!t":
+            case "t":
                 text = " ".join(inp[1:])
                 print(f"[green]Search text: {text}[green]")
-            case "!e":
+            case "e":
                 if len(inp) == 1:
                     ex_words = None
                     print("[green]Not excluding any words[/green]")
                     continue
                 ex_words = inp[1:]
                 print(f"[green]Excluding selected words: {ex_words}[/green]")
-            case "!el":
+            case "el":
                 ex_links = not ex_links
                 print(f"[green]Exluding text in links: {ex_links}[/green]")
-            case "!ec":
+            case "ec":
                 ignore_case = not ignore_case
                 print(f"[green]Ignoring exclusion case: {ignore_case}[/green]")
-            case "!m":
+            case "m":
                 if len(inp) > 2:
                     print("[red]max requires 1 or 0 arguments[/red]")
                     continue
@@ -140,7 +140,7 @@ def Shell(*args):
                     if debug:
                         print(f"[red]{e}[/red]")
                     continue
-            case "!p":
+            case "p":
                 print(f"Search text: {text}",
                       f"Max results: {max_res}",
                       f"Excluded words: {ex_words}",
@@ -154,7 +154,7 @@ def Shell(*args):
                     print(f"Number of results: {results}")
                 else:
                     print(f"Number of results: {len(results)}")
-            case "!s":
+            case "s":
                 if text == "":
                     print("[red]No search text![/red]")
                     continue
@@ -162,7 +162,7 @@ def Shell(*args):
                                       max_results=max_res,
                                       safesearch="Off")
                 print("[green]Results acquired[/green]")
-            case "!v":
+            case "v":
                 if results is None:
                     print("[red]No results yet![red]")
                     continue
@@ -175,15 +175,15 @@ def Shell(*args):
                     continue
                 Print_Search(results, step=step)
                 continue
-            case "!vs":
+            case "vs":
                 step = not step
                 print(f"[green]Stepping set to: {step}[/green]")
-            case "!d":
+            case "d":
                 debug = not debug
                 print(f"[green]Debugging set to: {debug}[/green]")
-            case "!h":
+            case "h":
                 print(shell_message)
-            case "!w":
+            case "w":
                 if len(inp) != 2:
                     print("[red]!w takes exactly 1 argument[/red]")
                     continue
@@ -194,7 +194,7 @@ def Shell(*args):
                     print(f"[red]Couldn't set width to {inp[1]}[/red]")
                     if debug:
                         print("[red]" + escape(e) + "[/red]")
-            case "!o":
+            case "o":
                 if results is None:
                     print("[red]No results to write[/red]")
                 if len(inp) < 2:
