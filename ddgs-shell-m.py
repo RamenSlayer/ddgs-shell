@@ -108,6 +108,8 @@ def Shell(*args):
             break
         else:
             inp = inp.split()
+        if len(inp) == 0:
+            continue
         match inp[0]:
             case "t":
                 text = " ".join(inp[1:])
@@ -226,6 +228,8 @@ def Shell(*args):
                         print(f"[red]Couldn't write to: {dest}[/red]")
                         if debug:
                             print(f"[red]{e}[/red]")
+            case _:
+                continue
     return 0
 
 
