@@ -29,6 +29,36 @@ h\t\tprint this message
 """
 
 
+def SepStr(string: str):
+    q_index = []
+    out = []
+    for i, char in enumerate(string):
+        if char == '"':
+            q_index.append(i)
+    if len(q_index) < 2:
+        return string.split()
+    q_index = q_index[:len(q_index)//2*2]
+    for word in string[:q_index[0]].split():
+        word = word.strip()
+        if len(word) != 0:
+            out.append(word)
+    for i in range(0, len(q_index), 2):
+        out.append(string[q_index[i]+1:q_index[i+1]])
+        if i < len(q_index)-2:
+            for word in string[q_index[i+1]+1:q_index[i+2]].split():
+                word = word.strip()
+                if len(word) != 0:
+                    out.append(word)
+        else:
+            for word in string[q_index[i+1]+1:].split():
+                print(word)
+                print(type(word))
+                word = word.strip()
+                if len(word) != 0:
+                    out.append(word)
+    return out
+
+
 def Exclude(results: list,
             words: list,
             ex_links: bool = False,
@@ -91,6 +121,7 @@ def Output_Search(results):
 
 
 def Shell(*args):
+    global console
     print("Welcome to DDGS expanded search")
     print(shell_message)
     text = ""
@@ -119,7 +150,7 @@ def Shell(*args):
                     ex_words = None
                     print("[green]Not excluding any words[/green]")
                     continue
-                ex_words = inp[1:]
+                ex_words = SepStr(" ".join(inp[1:]))
                 print(f"[green]Excluding selected words: {ex_words}[/green]")
             case "el":
                 ex_links = not ex_links
@@ -164,6 +195,8 @@ def Shell(*args):
                 results = api.search(text)
                 if not results['success']:
                     print("[red]Couldn't get results[/red]")
+                    if debug:
+                        print("[red]" + escape(results) + "[/red]")
                     results = None
                     continue
                 results = results["data"]
@@ -197,8 +230,12 @@ def Shell(*args):
             case "h":
                 print(shell_message)
             case "w":
-                if len(inp) != 2:
-                    print("[red]!w takes exactly 1 argument[/red]")
+                if len(inp) > 2:
+                    print("[red]w takes 0 or 1 arguments[/red]")
+                    continue
+                elif len(inp) == 1:
+                    console.width = None
+                    print("[green]Width set to None[/green]")
                     continue
                 try:
                     console.width = int(inp[1])
