@@ -49,8 +49,6 @@ def SepStr(string: str):
                     out.append(word)
         else:
             for word in string[q_index[i+1]+1:].split():
-                print(word)
-                print(type(word))
                 word = word.strip()
                 if len(word) != 0:
                     out.append(word)
