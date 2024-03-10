@@ -194,7 +194,7 @@ def Shell(*args):
                 if not results['success']:
                     print("[red]Couldn't get results[/red]")
                     if debug:
-                        print("[red]" + escape(results) + "[/red]")
+                        print("[red]" + escape(str(results)) + "[/red]")
                     results = None
                     continue
                 results = results["data"]
