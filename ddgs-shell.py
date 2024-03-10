@@ -123,7 +123,7 @@ def Shell(*args):
     print("Welcome to DDGS expanded search")
     print(shell_message)
     text = ""
-    max_res = None
+    max_res = 100
     ex_words = None
     results = None
     debug = False
