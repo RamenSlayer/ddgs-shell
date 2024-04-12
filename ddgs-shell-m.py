@@ -4,6 +4,7 @@ from ddg import Duckduckgo
 # from argparse import ArgumentParser as argparser
 from rich.console import Console
 from rich.markup import escape
+import pyperclip as cp
 
 width = 100
 console = Console(width=width)
@@ -98,16 +99,18 @@ def Exclude(results: list,
 
 def Print_Search(results: list, step: bool = False):
     if step:
-        print("[yellow]q to stop scrolling if needed[/yellow]")
+        print("[yellow](q)uit, (c)opy link[/yellow]")
     for res in results:
         print("[b]"+escape(res["title"])+"[/b]")
         print(escape(res["url"]))
         print(escape(res["description"]))
         print("-----------")
         if step:
-            tmp = input("Next? ")
+            tmp = input(" >> ")
             if tmp == 'q':
                 break
+            elif tmp == 'c':
+                cp.copy(res["url"])
     return 0
 
 
