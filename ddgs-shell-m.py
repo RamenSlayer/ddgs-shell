@@ -4,10 +4,25 @@ from ddg import Duckduckgo
 # from argparse import ArgumentParser as argparser
 from rich.console import Console
 from rich.markup import escape
-import pyperclip as cp
+from os import environ
+
+
+termux = False
+
+if "termux" in environ:
+    termux = True
+    from os import system as execute
+
+    def to_clipboard(text):
+        cmd = "termux-clipboard-set \"" + text.raw() + "\""
+        status = execute(cmd)
+        return status
+else:
+    from pyperclip import copy as to_clipboard
 
 width = 100
 console = Console(width=width)
+regprint = print
 print = console.print
 
 api = Duckduckgo()
@@ -28,6 +43,12 @@ o [FILES]\toutputs results to file(s)
 w WIDTH\t\tto set console to certain width
 h\t\tprint this message
 """
+
+
+def CleanStupidUrls(url: str):
+    """A stupid url is one that uses double quotes."""
+    url = url.replace('"', '\\"')
+    return url
 
 
 def SepStr(string: str):
@@ -110,7 +131,10 @@ def Print_Search(results: list, step: bool = False):
             if tmp == 'q':
                 break
             elif tmp == 'c':
-                cp.copy(res["url"])
+                if termux:
+                    status = to_clipboard(CleanStupidUrls(["url"]))
+                    print(f"Copy status: {status}")
+                to_clipboard(res["url"])
     return 0
 
 
