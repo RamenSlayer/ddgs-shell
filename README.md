@@ -14,6 +14,14 @@ For normal version:
 For mobile version:
 
 `pip install -r requirements-m.txt`
+
+For termux additionally:
+
+run `pkg install termux-api` in termux
+
+Install Termux:API from fdroid/Google/wherever else kids get apps nowadays
+
+
 ## TODO
 1. Write examples because rn I don't think the usage is obvious
 
