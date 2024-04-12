@@ -4,9 +4,12 @@ from duckduckgo_search import DDGS
 # from argparse import ArgumentParser as argparser
 from rich.console import Console
 from rich.markup import escape
+import pyperclip as cp
+
 
 width = None
 console = Console(width=width)
+regprint = print
 print = console.print
 
 shell_message = """
@@ -60,6 +63,7 @@ def Exclude(results: list,
             ex_links: bool = False,
             ignore_case: bool = True,
             preserve_initial: bool = True):
+    # ADD PART BY PART EXCLUSION
     if preserve_initial:
         results = results.copy()
     end = len(results)
@@ -96,16 +100,18 @@ def Exclude(results: list,
 
 def Print_Search(results: list, step: bool = False):
     if step:
-        print("[yellow]q to stop scrolling if needed[/yellow]")
+        print("[yellow](q)uit, (c)opy to clipboard[/yellow]")
     for res in results:
         print("[b]"+escape(res["title"])+"[/b]")
         print(escape(res["href"]))
         print(escape(res["body"]))
         print("-----------")
         if step:
-            tmp = input("Next ")
+            tmp = input(" >> ")
             if tmp in ["!q", 'q']:
                 break
+            elif tmp in ['!c', 'c']:
+                cp.copy(res["href"])
     return 0
 
 
@@ -128,6 +134,7 @@ def Shell(*args):
     ex_links = False
     ignore_case = True
     step = False
+    backend = "api"
     while True:
         inp = input(" > ")
         if inp == 'q':
@@ -168,7 +175,7 @@ def Shell(*args):
                 except Exception as e:
                     print(f"[red]Couldn't set max results to {' '.join(inp[1:])} [red]")
                     if debug:
-                        print(f"[red]{e}[/red]")
+                        regprint(e)
                     continue
             case "p":
                 print(f"Search text: {text}",
@@ -188,10 +195,20 @@ def Shell(*args):
                 if text == "":
                     print("[red]No search text![/red]")
                     continue
-                results = DDGS().text(keywords=text,
-                                      max_results=max_res,
-                                      safesearch="Off")
-                print("[green]Results acquired[/green]")
+                try:
+                    results = DDGS().text(keywords=text,
+                                          max_results=max_res,
+                                          safesearch="Off",
+                                          backend=backend)
+                    print("[green]Results acquired[/green]")
+                except Exception as e:
+                    if "ratelimit" in str(e).lower():
+                        print("[red]It appears we've been ratelimited")
+                    else:
+                        print("[red]Something went wrong[/red]")
+                    print("Try entering \"backend html/lite\"")
+                    if debug:
+                        regprint(e)
             case "v":
                 if results is None:
                     print("[red]No results yet![red]")
@@ -227,7 +244,7 @@ def Shell(*args):
                 except Exception as e:
                     print(f"[red]Couldn't set width to {inp[1]}[/red]")
                     if debug:
-                        print("[red]" + escape(e) + "[/red]")
+                        regprint(e)
             case "o":
                 if results is None:
                     print("[red]No results to write[/red]")
@@ -249,7 +266,16 @@ def Shell(*args):
                     except Exception as e:
                         print(f"[red]Couldn't write to: {dest}[/red]")
                         if debug:
-                            print(f"[red]{e}[/red]")
+                            regprint(e)
+            case "backend":
+                if len(inp) != 2:
+                    print("[red]Takes exactly one argument: html/api/lite")
+                    continue
+                if inp[1] in ["lite", "html", "api"]:
+                    backend = inp[1]
+                    print(f"[green]Set backend to {inp[1]}[/green]")
+                else:
+                    print("[red]Must be one of html/api/lite[/red]")
             case _:
                 continue
     return 0
