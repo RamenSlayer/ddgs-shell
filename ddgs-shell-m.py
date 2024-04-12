@@ -14,7 +14,7 @@ if "termux" in environ["PATH"]:
     from os import system as execute
 
     def to_clipboard(text):
-        cmd = "termux-clipboard-set \"" + text.raw() + "\""
+        cmd = "termux-clipboard-set \"" + text + "\""
         status = execute(cmd)
         return status
 else:
@@ -47,8 +47,7 @@ h\t\tprint this message
 
 def CleanStupidUrls(url: str):
     """A stupid url is one that uses double quotes."""
-    url = url.replace('"', '\\"')
-    return url
+    return url.replace('"', '\\"')
 
 
 def SepStr(string: str):
@@ -132,7 +131,7 @@ def Print_Search(results: list, step: bool = False):
                 break
             elif tmp == 'c':
                 if termux:
-                    status = to_clipboard(CleanStupidUrls(["url"]))
+                    status = to_clipboard(CleanStupidUrls(res["url"]))
                     print(f"Copy status: {status}")
                 to_clipboard(res["url"])
     return 0
