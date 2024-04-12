@@ -9,7 +9,7 @@ from os import environ
 
 termux = False
 
-if "termux" in environ:
+if "termux" in environ["PATH"]:
     termux = True
     from os import system as execute
 
