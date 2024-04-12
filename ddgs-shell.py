@@ -4,7 +4,7 @@ from duckduckgo_search import DDGS
 # from argparse import ArgumentParser as argparser
 from rich.console import Console
 from rich.markup import escape
-import pyperclip as cp
+from pyperclip import copy as to_clipboard
 
 
 width = None
@@ -111,7 +111,7 @@ def Print_Search(results: list, step: bool = False):
             if tmp in ["!q", 'q']:
                 break
             elif tmp in ['!c', 'c']:
-                cp.copy(res["href"])
+                to_clipboard(res["href"])
     return 0
 
 
