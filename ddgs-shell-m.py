@@ -118,6 +118,7 @@ def Exclude(results: list,
 
 
 def Print_Search(results: list, step: bool = False):
+    global termux
     if step:
         print("[yellow](q)uit, (c)opy link[/yellow]")
     for res in results:
@@ -133,7 +134,8 @@ def Print_Search(results: list, step: bool = False):
                 if termux:
                     status = to_clipboard(CleanStupidUrls(res["url"]))
                     print(f"Copy status: {status}")
-                to_clipboard(res["url"])
+                else:
+                    to_clipboard(res["url"])
     return 0
 
 
