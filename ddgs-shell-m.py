@@ -79,45 +79,46 @@ def SepStr(string: str):
 
 
 def Exclude(results: list,
-            words: list,
-            ex_links: bool = False,
-            ignore_case: bool = True,
-            preserve_initial: bool = True):
-    if preserve_initial:
-        results = results.copy()
-    end = len(results)
-    i = 0
-    while i < end:
-        title = results[i]["title"]
-        body = results[i]["description"]
-        link = results[i]["url"]
-        if ignore_case:
-            body = body.lower()
-            title = title.lower()
-            link = link.lower()
-        for word in words:
+            exwords: list,
+            fex_links: bool = False,
+            exlinks: list = list(),
+            ignore_case: bool = True
+            ) -> list:
+    if len(exwords) + len(exlinks) == 0:
+        return results
+    out = []
+    for res in results:
+        include = True
+        # just check the link first amiright
+        if fex_links or len(exlinks) > 0:
+            link = res["url"].lower()
+            if fex_links and len(exlinks) == 0:
+                exlinks = exwords
+            for exlink in exlinks:
+                if exlink.lower() in link:
+                    include = False
+                    break
+        if not include:
+            continue
+        if len(exwords) == 0:
+            if include:
+                out.append(res)
+            continue
+        # and if needed check the body
+        title = res["title"].lower() if ignore_case else res["title"]
+        body = res["description"].lower() if ignore_case else res["description"]
+        for word in exwords:
             if ignore_case:
                 word = word.lower()
-            if word in title:
-                results.__delitem__(i)
-                end -= 1
-                i -= 1
+            if word in title or word in body:
+                include = False
                 break
-            elif word in body:
-                results.__delitem__(i)
-                end -= 1
-                i -= 1
-                break
-            elif ex_links and word in link:
-                results.__delitem__(i)
-                end -= 1
-                i -= 1
-                break
-        i += 1
-    return results
+        if include:
+            out.append(res)
+    return out
 
 
-def Print_Search(results: list, step: bool = False):
+def PrintSearch(results: list, step: bool = False):
     global termux
     if step:
         print("[yellow](q)uit, (c)opy link[/yellow]")
@@ -139,7 +140,7 @@ def Print_Search(results: list, step: bool = False):
     return 0
 
 
-def Output_Search(results):
+def OutputSearch(results):
     out = []
     for res in results:
         out.append("\n".join((res["title"], res["url"], res["description"])))
@@ -151,13 +152,14 @@ def Shell(*args):
     print("Welcome to DDGS expanded search")
     print(shell_message)
     text = ""
-    ex_words = None
-    results = None
+    ex_words = list()
+    results = list()
     debug = False
     ex_links = False
+    ex_linkwords = list()
     ignore_case = True
     step = False
-    max_res = None
+    max_res = 0
     while True:
         inp = input(" > ")
         if inp == 'q':
@@ -173,14 +175,18 @@ def Shell(*args):
                 print(f"[green]Search text: {text}[green]")
             case "e":
                 if len(inp) == 1:
-                    ex_words = None
+                    ex_words = list()
                     print("[green]Not excluding any words[/green]")
                     continue
                 ex_words = SepStr(" ".join(inp[1:]))
                 print(f"[green]Excluding selected words: {ex_words}[/green]")
             case "el":
-                ex_links = not ex_links
-                print(f"[green]Exluding text in links: {ex_links}[/green]")
+                if len(inp) == 1:
+                    ex_linkwords = list()
+                    print("[green]Not excluding any words[/green]")
+                    continue
+                ex_linkwords = SepStr(" ".join(inp[1:]))
+                print(f"[green]Excluding from links: {ex_linkwords}[/green]")
             case "ec":
                 ignore_case = not ignore_case
                 print(f"[green]Ignoring exclusion case: {ignore_case}[/green]")
@@ -189,8 +195,8 @@ def Shell(*args):
                     print("[red]max requires 1 or 0 arguments[/red]")
                     continue
                 if len(inp) == 1:
-                    max_res = None
-                    print("[green]max set to None[/green]")
+                    max_res = 0
+                    print("[green]Results won't be capped[/green]")
                     continue
                 try:
                     max_res = int(inp[1])
@@ -198,7 +204,7 @@ def Shell(*args):
                 except Exception as e:
                     print(f"[red]Couldn't set max results to {' '.join(inp[1:])} [red]")
                     if debug:
-                        print(f"[red]{e}[/red]")
+                        regprint(e)
                     continue
             case "p":
                 print(f"Search text: {text}",
@@ -209,11 +215,8 @@ def Shell(*args):
                       f"Excluding links: {ex_links}",
                       f"Ignoring case: {ignore_case}",
                       f"Width: {console.width}",
+                      f"Number of results: {len(results)}",
                       sep="\n")
-                if results is None:
-                    print(f"Number of results: {results}")
-                else:
-                    print(f"Number of results: {len(results)}")
             case "s":
                 if text == "":
                     print("[red]No search text![/red]")
@@ -223,28 +226,25 @@ def Shell(*args):
                     print("[red]Couldn't get results[/red]")
                     if debug:
                         print("[red]" + escape(str(results)) + "[/red]")
-                    results = None
+                    results = list()
                     continue
                 results = results["data"]
                 print("[green]Results acquired[/green]")
             case "v":
-                if results is None:
-                    print("[red]No results![red]")
+                if len(results) == 0:
+                    print("[red]No results to display[red]")
                     continue
                 tmp_results = results
-                if max_res is None:
+                if max_res == 0:
                     pass
                 else:
                     tmp_results = results[:max_res]
-                if ex_words is not None:
-                    Print_Search(Exclude(tmp_results,
-                                         ex_words,
-                                         ex_links,
-                                         ignore_case),
-                                 step=step)
-                    del tmp_results
-                    continue
-                Print_Search(tmp_results, step=step)
+                PrintSearch(Exclude(results=tmp_results,
+                                    exwords=ex_words,
+                                    fex_links=ex_links,
+                                    exlinks=ex_linkwords,
+                                    ignore_case=ignore_case),
+                            step=step)
                 del tmp_results
                 continue
             case "vs":
@@ -271,7 +271,7 @@ def Shell(*args):
                     if debug:
                         print("[red]" + escape(e) + "[/red]")
             case "o":
-                if results is None:
+                if len(results) == 0:
                     print("[red]No results to write[/red]")
                 if len(inp) < 2:
                     print("[red]No file specified[/red]")
@@ -279,15 +279,12 @@ def Shell(*args):
                 for dest in inp[1:]:
                     try:
                         with open(dest, 'w') as f:
-                            if ex_words is not None:
-                                f.write(Output_Search(Exclude(results,
-                                                              ex_words,
-                                                              ex_links,
-                                                              ignore_case)))
-                                print(f"[green]Wrote output to: {dest}[/green]")
-                                continue
-                            f.write(Output_Search(results))
-                        print(f"[green]Wrote output to: {dest}[/green]")
+                            f.write(OutputSearch(Exclude(results=results,
+                                                 exwords=ex_words,
+                                                 fex_links=ex_links,
+                                                 exlinks=ex_linkwords,
+                                                 ignore_case=ignore_case)))
+                            print(f"[green]Wrote output to: {dest}[/green]")
                     except Exception as e:
                         print(f"[red]Couldn't write to: {dest}[/red]")
                         if debug:
