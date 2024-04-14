@@ -5,6 +5,7 @@ from ddg import Duckduckgo
 from rich.console import Console
 from rich.markup import escape
 from os import environ
+from shlex import quote
 
 
 termux = False
@@ -14,7 +15,7 @@ if "termux" in environ["PATH"]:
     from os import system as execute
 
     def to_clipboard(text):
-        cmd = "termux-clipboard-set \"" + text + "\""
+        cmd = "termux-clipboard-set '" + text + "'"
         status = execute(cmd)
         return status
 else:
@@ -31,8 +32,8 @@ shell_message = """
 q\t\tquit
 v\t\tprint out the results
 t TEXT\t\ttext to search for
-e TEXT\t\texclude words, no text unsets it
-el\t\tset/unset excluding words from links, off by default
+e TEXT\t\texclude words, no arguments unsets it
+el TEXT\t\texclude text from urls, no arguments unsets it
 ec\t\tset/unset case sensitivity for word exclusion
 p\t\tprint all variables
 s\t\texecutes search
@@ -43,11 +44,6 @@ o [FILES]\toutputs results to file(s)
 w WIDTH\t\tto set console to certain width
 h\t\tprint this message
 """
-
-
-def CleanStupidUrls(url: str):
-    """A stupid url is one that uses double quotes."""
-    return url.replace('"', '\\"')
 
 
 def SepStr(string: str):
@@ -133,7 +129,7 @@ def PrintSearch(results: list, step: bool = False):
                 break
             elif tmp == 'c':
                 if termux:
-                    status = to_clipboard(CleanStupidUrls(res["url"]))
+                    status = to_clipboard(quote(res["url"]))
                     print(f"Copy status: {status}")
                 else:
                     to_clipboard(res["url"])
