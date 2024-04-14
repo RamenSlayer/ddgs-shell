@@ -16,8 +16,8 @@ shell_message = """
 q\t\tquit
 v\t\tprint out the results
 t TEXT\t\ttext to search for
-e TEXT\t\texclude words, no text unsets it
-el\t\tset/unset excluding words from links, off by default
+e TEXT\t\texclude words, no arguments unsets it
+el TEXT\t\texclude text from urls, no arguments unsets it
 ec\t\tset/unset case sensitivity for word exclusion
 m [NUM]\t\tset max number of results
 p\t\tprint all variables
