@@ -164,4 +164,5 @@ cython_debug/
 *.kate-swp
 tmp_*
 tmp.*
+tmp
 # oh no now everyone knows I use kate and not vim. Fr though I use micro for cli.
