@@ -14,18 +14,18 @@ print = console.print
 
 shell_message = """
 q\t\tquit
-v\t\tprint out the results
 t TEXT\t\ttext to search for
+s\t\texecutes search
+v\t\tprint out the results
+vs\t\tprint the results one at a time
 e TEXT\t\texclude words, no arguments unsets it
 el TEXT\t\texclude text from urls, no arguments unsets it
 ec\t\tset/unset case sensitivity for word exclusion
 m [NUM]\t\tset max number of results
 p\t\tprint all variables
-s\t\texecutes search
 d\t\tset/unset debugging info, off by default
-vs\t\tset/unset stepping for printing results, off by default
 o [FILES]\toutputs results to file(s)
-w WIDTH\t\tto set console to certain width
+w WIDTH\t\tset console to certain width
 h\t\tprint this message
 """
 
@@ -134,7 +134,6 @@ def Shell(*args):
     ex_links = False
     ex_linkwords = list()
     ignore_case = True
-    step = False
     backend = "lite"
     while True:
         inp = input(" > ")
@@ -186,7 +185,6 @@ def Shell(*args):
                 print(f"Search text: {text}",
                       f"Max results: {max_res}",
                       f"Excluded words: {ex_words}",
-                      f"Stepping: {step}",
                       f"Debugging: {debug}",
                       f"Excluding links: {ex_links}",
                       f"Ignoring case: {ignore_case}",
@@ -220,11 +218,19 @@ def Shell(*args):
                                     fex_links=ex_links,
                                     exlinks=ex_linkwords,
                                     ignore_case=ignore_case),
-                            step=step)
+                            step=False)
                 continue
             case "vs":
-                step = not step
-                print(f"[green]Stepping set to: {step}[/green]")
+                if len(results) == 0:
+                    print("[red]No results to display[red]")
+                    continue
+                PrintSearch(Exclude(results=results,
+                                    exwords=ex_words,
+                                    fex_links=ex_links,
+                                    exlinks=ex_linkwords,
+                                    ignore_case=ignore_case),
+                            step=True)
+                continue
             case "d":
                 debug = not debug
                 print(f"[green]Debugging set to: {debug}[/green]")
@@ -254,12 +260,16 @@ def Shell(*args):
                 for dest in inp[1:]:
                     try:
                         with open(dest, 'w') as f:
-                            f.write(OutputSearch(Exclude(results,
-                                                         ex_words,
-                                                         ex_links,
-                                                         ignore_case)))
-                            print(f"[green]Wrote output to: {dest}[/green]")
-                            continue
+                            f.write(
+                                OutputSearch(
+                                    Exclude(
+                                        results=results,
+                                        exwords=ex_words,
+                                        fex_links=ex_links,
+                                        exlinks=ex_linkwords,
+                                        ignore_case=ignore_case)))
+                        print(f"[green]Wrote output to: {dest}[/green]")
+                        continue
                     except Exception as e:
                         print(f"[red]Couldn't write to: {dest}[/red]")
                         if debug:
